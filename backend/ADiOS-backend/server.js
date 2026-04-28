@@ -1,27 +1,17 @@
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
-
 const app = express();
 
-// Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+// تشغيل الملفات من مجلد public
+app.use(express.static(path.join(__dirname, 'public')));
 
-// عرض صور الجنس فقط (male1/female/not)
-app.use("/profile_photo", express.static("profile_photo"));
-
-// Routes
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
-
-// Start server
-const PORT = process.env.PORT || 3000;
-app.get("/", (req, res) => {
-  res.send("ADiOS API is running");
+// هاد السطر عشان لو طلب أي رابط يفتح له صفحة الاندكس بدال الـ 404
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+// تأكد إن هاد السطر تحت الروابط (API Routes)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
 });
