@@ -71,7 +71,7 @@ async function loadUserHeader() {
     }
 
     try {
-        const res = await fetch("http://localhost:3000/api/auth/profile", {
+        const res = await fetch("https://adiosrailway-production.up.railway.app/api/auth/profile", {
             method: "GET",
             headers: { "Authorization": "Bearer " + token }
         });
@@ -83,10 +83,10 @@ async function loadUserHeader() {
 
         const img =
             user.gender === "ذكر"
-                ? "http://localhost:3000/profile_photo/male1.png"
+                ? "https://adiosrailway-production.up.railway.app/profile_photo/male1.png"
                 : user.gender === "أنثى"
-                ? "http://localhost:3000/profile_photo/female.png"
-                : "http://localhost:3000/profile_photo/not.png";
+                ? "https://adiosrailway-production.up.railway.app/profile_photo/female.png"
+                : "https://adiosrailway-production.up.railway.app/profile_photo/not.png";
 
         authArea.innerHTML = `
             <div onclick="window.location.href='profile.html'"
