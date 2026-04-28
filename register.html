@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إنشاء حساب</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <div class="logo"><a href="index.html">ADiOS</a></div>
+    <nav>
+        <ul>
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a class="login-card" href="login.html">تسجيل الدخول</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="auth-container">
+    <div class="auth-box">
+
+        <h2 class="neon-text-purple">إنشاء حساب جديد</h2>
+
+        <!-- ========== الحقول الإلزامية ========== -->
+        <label>اسم المستخدم <span style="color:#ff3b3b;">*</span></label>
+        <input id="username" class="search-input" placeholder="مثال: samir123">
+
+        <label>الاسم الكامل <span style="color:#ff3b3b;">*</span></label>
+        <input id="name" class="search-input" placeholder="مثال: سمير أحمد">
+
+        <label>البريد الإلكتروني <span style="color:#ff3b3b;">*</span></label>
+        <input id="email" class="search-input" placeholder="مثال: example@mail.com">
+
+        <label>كلمة المرور <span style="color:#ff3b3b;">*</span></label>
+        <input id="password" type="password" class="search-input" placeholder="••••••••">
+
+        <label>الجنس <span style="color:#ff3b3b;">*</span></label>
+        <select id="gender" class="search-input">
+            <option value="">اختر الجنس</option>
+            <option value="ذكر">ذكر</option>
+            <option value="أنثى">أنثى</option>
+        </select>
+
+        <label>تاريخ الميلاد <span style="color:#ff3b3b;">*</span></label>
+        <input id="birthdate" type="date" class="search-input">
+
+        <!-- ========== الحقول الاختيارية ========== -->
+        <p style="color:#888; font-size:0.85rem; text-align:center; margin: 5px 0;">
+            — الحقول التالية اختيارية، يمكن إضافتها لاحقاً من الملف الشخصي —
+        </p>
+
+        <label>نوع الطالب</label>
+        <select id="student_type" class="search-input" onchange="toggleSkill()">
+            <option value="">اختر نوع الطالب</option>
+            <option value="طالب">طالب</option>
+            <option value="طالب ذو خبرة">طالب ذو خبرة</option>
+            <option value="خريج">خريج</option>
+        </select>
+
+        <label>التخصص</label>
+        <select id="major" class="search-input">
+            <option value="">اختر التخصص</option>
+            <option value="برمجة الويب">برمجة الويب</option>
+            <option value="الأمن السيبراني">الأمن السيبراني</option>
+            <option value="الشبكات والحوسبة السحابية">الشبكات والحوسبة السحابية</option>
+            <option value="إدارة علم البيانات والذكاء الاصطناعي">إدارة علم البيانات والذكاء الاصطناعي</option>
+            <option value="برمجة التطبيقات">برمجة التطبيقات</option>
+        </select>
+
+        <label id="skill_label" class="hidden">المهارة</label>
+        <input id="skill_title" class="search-input hidden" placeholder="مثال: Frontend Developer">
+
+        <label>رقم الواتساب</label>
+        <input id="whatsapp" class="search-input" placeholder="مثال: 0590000000">
+
+        <label>روابط العمل</label>
+        <input id="work_links" class="search-input" placeholder="مثال: https://github.com/samir">
+
+        <button type="button" class="search-btn w-100" onclick="register()">إنشاء حساب</button>
+
+        <p id="msg"></p>
+
+        <p class="auth-switch">لديك حساب؟ <span onclick="window.location.href='login.html'">تسجيل الدخول</span></p>
+    </div>
+</div>
+
+<script>
+function toggleSkill() {
+    const type = document.getElementById("student_type").value;
+    const skill = document.getElementById("skill_title");
+    const label = document.getElementById("skill_label");
+
+    if (type === "طالب" || type === "") {
+        skill.classList.add("hidden");
+        label.classList.add("hidden");
+        skill.value = "";
+    } else {
+        skill.classList.remove("hidden");
+        label.classList.remove("hidden");
+    }
+}
+
+async function register() {
+    const msg = document.getElementById("msg");
+
+    // ✅ التحقق من الحقول الإلزامية فقط قبل الإرسال
+    const required = {
+        username: "اسم المستخدم",
+        name:     "الاسم الكامل",
+        email:    "البريد الإلكتروني",
+        password: "كلمة المرور",
+        gender:   "الجنس",
+        birthdate:"تاريخ الميلاد"
+    };
+
+    for (const [id, fieldLabel] of Object.entries(required)) {
+        if (!document.getElementById(id).value.trim()) {
+            msg.style.color = "#ff3b3b";
+            msg.innerText = `حقل "${fieldLabel}" مطلوب`;
+            return;
+        }
+    }
+
+    const userData = {
+        username:     document.getElementById("username").value.trim(),
+        name:         document.getElementById("name").value.trim(),
+        email:        document.getElementById("email").value.trim(),
+        password:     document.getElementById("password").value,
+        gender:       document.getElementById("gender").value,
+        birthdate:    document.getElementById("birthdate").value,
+        student_type: document.getElementById("student_type").value,
+        major:        document.getElementById("major").value,
+        skill_title:  document.getElementById("skill_title").value.trim(),
+        whatsapp:     document.getElementById("whatsapp").value.trim(),
+        work_links:   document.getElementById("work_links").value.trim()
+    };
+
+    try {
+        const res = await fetch("http://localhost:3000/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData)
+        });
+
+        const data = await res.json();
+        msg.innerText = data.message;
+
+        if (data.status === "success") {
+            msg.style.color = "var(--neon-blue)";
+            setTimeout(() => window.location.href = "login.html", 1500);
+        } else {
+            msg.style.color = "#ff3b3b";
+        }
+    } catch (err) {
+        msg.style.color = "#ff3b3b";
+        msg.innerText = "تعذر الاتصال بالسيرفر";
+    }
+}
+</script>
+
+</body>
+</html>

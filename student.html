@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>ADiOS - الخريجون</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <div class="logo"><a href="index.html">ADiOS</a></div>
+    <nav>
+        <ul>
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="quiz.html">الاختبار</a></li>
+            <li><a href="masar.html">المسار</a></li>
+            <li><a href="student.html">الخريجون</a></li>
+        </ul>
+    </nav>
+
+    <!-- ✅ إصلاح: إزالة authArea المكرر -->
+    <div id="authArea">
+        <button class="login-card" onclick="location.href='login.html'">تسجيل الدخول</button>
+    </div>
+</header>
+
+<div class="page-content">
+    <h1 style="color: var(--neon-blue);">قاعدة بيانات المبدعين</h1>
+    <p>ابحث عن الكفاءات الوطنية في مختلف المجالات التقنية.</p>
+
+    <div class="search-section">
+        <div class="search-container">
+            <select id="searchType" class="search-input">
+                <option value="">— النوع —</option>
+                <option value="طالب">طالب</option>
+                <option value="طالب ذو خبرة">طالب ذو خبرة</option>
+                <option value="خريج">خريج</option>
+            </select>
+
+            <!-- ✅ إصلاح رئيسي: القيم الآن مطابقة تماماً لما يُحفظ في قاعدة البيانات -->
+            <select id="searchMajor" class="search-input">
+                <option value="">التخصص</option>
+                <option value="برمجة الويب">برمجة الويب</option>
+                <option value="الشبكات والحوسبة السحابية">الشبكات والحوسبة السحابية</option>
+                <option value="الأمن السيبراني">الأمن السيبراني</option>
+                <option value="إدارة علم البيانات والذكاء الاصطناعي">علم البيانات والذكاء الاصطناعي</option>
+                <option value="برمجة التطبيقات">برمجة التطبيقات</option>
+            </select>
+
+            <input id="searchSkill" type="text" class="search-input" placeholder="المهارة (اختياري)">
+            <input id="searchUsername" type="text" class="search-input" placeholder="اسم المستخدم أو الاسم">
+            <button class="search-btn" onclick="searchStudents()">بحث</button>
+        </div>
+    </div>
+
+    <div class="students-grid" id="studentsGrid"></div>
+
+    <button class="load-more hidden" id="loadMoreBtn" onclick="loadMore()">عرض المزيد</button>
+</div>
+
+<script>
+function toggleDropdown() {
+    const dropdown = document.getElementById("profileDropdown");
+    if (dropdown) dropdown.classList.toggle("hidden");
+}
+
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
+let allResults = [];
+let currentIndex = 0;
+
+async function searchStudents() {
+    const type     = document.getElementById("searchType").value;
+    const major    = document.getElementById("searchMajor").value;
+    const skill    = document.getElementById("searchSkill").value;
+    const username = document.getElementById("searchUsername").value;
+    const url = new URL("http://localhost:3000/api/auth/search");
+
+    if (type)     url.searchParams.append("student_type", type);
+    if (major)    url.searchParams.append("major", major);
+    if (skill)    url.searchParams.append("skill", skill);
+    if (username) url.searchParams.append("username", username);
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const grid = document.getElementById("studentsGrid");
+        grid.innerHTML = "";
+
+        if (!data.users || data.users.length === 0) {
+            grid.innerHTML = `<p style="color:#ccc;text-align:center;grid-column: 1 / -1;">لا يوجد نتائج مطابقة</p>`;
+            document.getElementById("loadMoreBtn").classList.add("hidden");
+            return;
+        }
+
+        allResults = data.users;
+        currentIndex = 0;
+        loadMore();
+    } catch (err) {
+        console.error("Error searching students:", err);
+    }
+}
+
+function loadMore() {
+    const grid = document.getElementById("studentsGrid");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    const slice = allResults.slice(currentIndex, currentIndex + 6);
+    currentIndex += 6;
+
+    slice.forEach(user => {
+        const img =
+            user.gender === "ذكر"
+                ? "http://localhost:3000/profile_photo/male1.png"
+                : user.gender === "أنثى"
+                ? "http://localhost:3000/profile_photo/female.png"
+                : "http://localhost:3000/profile_photo/not.png";
+
+        const card = document.createElement("div");
+        card.className = "student-card";
+        card.onclick = () => window.location.href = `profile.html?id=${user.id}`;
+        card.innerHTML = `
+            <div class="card-header">
+                <div class="student-info">
+                    <span class="student-name">${user.name}</span>
+                    <span class="student-major" style="color:#aaa; font-size:0.8rem;">@${user.username}</span>
+                    <span class="student-major">${user.major || "تخصص غير محدد"}</span>
+                </div>
+                <div class="student-img" style="background-image:url('${img}')"></div>
+            </div>
+            <div class="card-body">
+                <p class="student-skill"><strong>المهارة:</strong> ${user.skill_title || "—"}</p>
+            </div>`;
+        grid.appendChild(card);
+    });
+
+    if (currentIndex >= allResults.length) {
+        loadMoreBtn.classList.add("hidden");
+    } else {
+        loadMoreBtn.classList.remove("hidden");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    searchStudents();
+});
+</script>
+
+<!-- script.js يتولى تحديث الهيدر تلقائياً -->
+<script src="script.js"></script>
+</body>
+</html>

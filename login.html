@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- الهيدر -->
+<header>
+    <div class="logo"><a href="index.html">ADiOS</a></div>
+<nav>
+    <ul>
+        <li><a href="index.html">الرئيسية</a></li>
+    </ul>
+</nav>
+</header>
+
+<!-- صفحة تسجيل الدخول -->
+<div class="auth-container">
+    <div class="auth-box">
+
+        <h2 class="neon-text-blue">تسجيل الدخول</h2>
+
+        <!-- اسم المستخدم -->
+        <label>اسم المستخدم</label>
+        <input id="username" class="search-input" placeholder="مثال: samir123">
+
+        <!-- كلمة المرور -->
+        <label>كلمة المرور</label>
+        <input id="password" type="password" class="search-input" placeholder="••••••••">
+
+        <button class="search-btn w-100" onclick="login()">دخول</button>
+
+        <p id="msg"></p>
+
+        <p class="auth-switch">ليس لديك حساب؟ <span onclick="goRegister()">إنشاء حساب</span></p>
+    </div>
+</div>
+
+<script>
+function goRegister() {
+    window.location.href = "register.html";
+}
+
+async function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+
+    try {
+        const response = await fetch("http://localhost:3000/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+            // تخزين التوكن
+            localStorage.setItem("token", data.token);
+            
+            msg.style.color = "#00ffcc";
+            msg.innerText = "تم تسجيل الدخول! جاري التحويل...";
+
+            // التحويل المباشر
+            console.log("نجح الدخول، يتم التحويل الآن إلى profile.html");
+            window.location.href = "profile.html"; 
+            
+        } else {
+            msg.style.color = "#ff3b3b";
+            msg.innerText = data.message || "خطأ في الدخول";
+        }
+    } catch (err) {
+        console.error("Fetch Error:", err);
+        msg.innerText = "تعذر الاتصال بالسيرفر";
+    }
+}
+
+
+
+</script>
+
+    <script src="script.js"></script>
+
+
+</body>
+</html>
